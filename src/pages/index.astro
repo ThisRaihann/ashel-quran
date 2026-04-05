@@ -1,11 +1,256 @@
 ---
-import Welcome from '../components/Welcome.astro';
+import '../styles/global.css';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import ashelData from '../data/ashel.json';
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Ashel — Cahaya Al-Qur'an Harimu">
+  <div class="min-h-screen relative overflow-x-hidden pb-20">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@400&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
+
+    <div class="pointer-events-none fixed inset-0 z-0 opacity-60">
+      <div class="absolute -top-32 -left-40 w-[600px] h-[600px] rounded-full bg-emerald-900/20 blur-[120px]"></div>
+      <div class="absolute -bottom-20 -right-32 w-[500px] h-[500px] rounded-full bg-amber-900/15 blur-[100px]"></div>
+      <div class="absolute inset-0 opacity-[0.05]" style="background-image:repeating-linear-gradient(0deg,transparent,transparent 59px, #b49146 60px),repeating-linear-gradient(90deg,transparent,transparent 59px, #b49146 60px);"></div>
+    </div>
+
+    <div class="relative z-10 flex flex-col items-center px-4 py-12 max-w-2xl mx-auto min-h-screen">
+
+      <header class="flex items-center gap-4 mb-10 animate-fade-down">
+        <div class="w-12 h-12 rounded-full border border-amber-500/40 flex items-center justify-center text-amber-400 text-xl shadow-[0_0_15px_rgba(201,151,62,0.1)]">☽</div>
+        <div class="text-left">
+          <h1 class="font-display text-2xl tracking-[0.25em] text-amber-300 leading-none">ASHEL</h1>
+          <p class="text-[0.6rem] tracking-[0.2em] text-stone-500 uppercase mt-1">Cahaya Al-Qur'an Harimu</p>
+        </div>
+      </header>
+
+      <div class="w-full mb-10 z-20 animate-fade-up">
+        <button id="generate-btn" class="group w-full flex items-center justify-center gap-3 bg-emerald-900 hover:bg-emerald-800 text-emerald-50 border border-emerald-700/40 rounded-2xl py-6 px-6 font-display text-xs tracking-[0.2em] uppercase transition-all duration-300 shadow-2xl active:scale-95 disabled:opacity-50">
+          <span id="btn-icon">✦</span>
+          <span id="btn-label">Ambil Hikmah Hari Ini</span>
+        </button>
+      </div>
+
+      <div id="ads-placeholder" class="w-full min-h-[90px] mb-6 flex items-center justify-center border border-dashed border-white/5 rounded-xl opacity-20">
+        <span class="text-[10px] tracking-widest uppercase">Ruang Cahaya</span>
+      </div>
+
+      <div id="main-container" class="w-full space-y-6">
+        <div id="state-idle" class="text-center py-20 opacity-20">
+           <p class="font-display text-[0.5rem] tracking-[0.5em] uppercase italic">Ketuk cahaya di atas untuk memulai hari</p>
+        </div>
+
+        <div id="state-loading" class="hidden text-center py-20">
+           <div class="w-10 h-10 border-2 border-amber-500/10 border-t-amber-500 rounded-full animate-spin mx-auto mb-4"></div>
+           <p class="text-xs italic text-stone-500 animate-pulse">Menghubungkan hati dengan langit...</p>
+        </div>
+
+        <div id="state-result" class="hidden flex flex-col gap-6 scroll-mt-24">
+          
+          <div class="rounded-2xl border border-amber-900/20 bg-stone-950/40 backdrop-blur-md p-6 animate-slide-in">
+            <div class="flex items-center justify-between mb-4 border-b border-white/5 pb-4">
+              <div>
+                <h3 id="surah-latin" class="font-display text-amber-300 text-xl tracking-wider uppercase"></h3>
+                <p id="surah-arti" class="text-stone-500 text-[0.6rem] italic mt-1"></p>
+              </div>
+              <div id="surah-arab" class="text-3xl text-amber-100/30 font-arabic leading-none"></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center text-[0.5rem] uppercase tracking-widest text-stone-600 font-bold">
+               <div class="bg-white/5 p-2 rounded-lg"><p>No</p><p id="surah-nomor" class="text-emerald-400 mt-1"></p></div>
+               <div class="bg-white/5 p-2 rounded-lg"><p>Ayat</p><p id="surah-ayat-count" class="text-emerald-400 mt-1"></p></div>
+               <div class="bg-white/5 p-2 rounded-lg"><p>Asal</p><p id="surah-tempat" class="text-emerald-400 mt-1"></p></div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl border border-amber-500/10 bg-stone-900/30 backdrop-blur-xl p-8 shadow-2xl relative animate-slide-in [animation-delay:100ms]">
+            <div class="absolute top-0 right-0 p-5">
+               <span id="ayat-badge" class="text-[0.6rem] font-display text-amber-500/80 border border-amber-500/20 px-4 py-1.5 rounded-full bg-amber-950/30"></span>
+            </div>
+            <p id="ayat-arab" dir="rtl" class="font-arabic text-4xl md:text-5xl text-white leading-[2.5] text-right mb-10 drop-shadow-xl"></p>
+            <p id="ayat-indo" class="font-serif text-lg text-stone-200 leading-relaxed italic border-l-2 border-amber-500/40 pl-6"></p>
+            
+            <div class="grid grid-cols-3 gap-3 mt-10">
+               <button id="btn-audio" class="bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-emerald-500/20 transition group text-center active:scale-95">
+                  <span class="block text-xl">🔊</span>
+                  <span class="text-[0.5rem] uppercase text-stone-500 group-hover:text-emerald-400 mt-1">Audio</span>
+               </button>
+               <button id="btn-copy" class="bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-amber-500/20 transition group text-center active:scale-95">
+                  <span class="block text-xl">📋</span>
+                  <span class="text-[0.5rem] uppercase text-stone-500 group-hover:text-amber-400 mt-1">Salin</span>
+               </button>
+               <button id="btn-share" class="bg-white/5 p-4 rounded-xl border border-white/5 hover:bg-blue-500/20 transition group text-center active:scale-95">
+                  <span class="block text-xl">📤</span>
+                  <span class="text-[0.5rem] uppercase text-stone-500 group-hover:text-blue-400 mt-1">Share</span>
+               </button>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-emerald-500/20 bg-emerald-950/20 backdrop-blur-md p-6 relative animate-slide-in [animation-delay:200ms]">
+            <div class="flex items-center gap-2 mb-4">
+               <span class="relative flex h-2 w-2"><span class="animate-ping absolute inset-0 rounded-full bg-emerald-400 opacity-75"></span><span class="relative rounded-full h-2 w-2 bg-emerald-400"></span></span>
+               <p class="font-display text-[0.6rem] tracking-[0.3em] text-emerald-400 uppercase">Pesan Dari Hati</p>
+            </div>
+            <p id="ashel-msg" class="text-emerald-50 text-sm leading-loose font-serif italic opacity-90"></p>
+          </div>
+
+          <div id="tafsir-card" class="rounded-2xl border border-white/5 bg-stone-950/20 overflow-hidden animate-slide-in [animation-delay:300ms] mb-10">
+            <button id="tafsir-toggle" class="w-full p-5 flex items-center justify-between hover:bg-white/5 transition-colors focus:outline-none">
+              <p class="font-display text-[0.6rem] tracking-widest text-stone-600 uppercase">Pelajari Tafsir Kemenag</p>
+              <span id="tafsir-icon" class="transition-transform duration-300">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </span>
+            </button>
+            <div id="tafsir-body" class="max-h-0 overflow-hidden transition-all duration-500 ease-in-out">
+              <p id="ayat-tafsir" class="px-5 pb-6 text-stone-500 text-[0.75rem] leading-relaxed font-serif border-t border-white/5 pt-4"></p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <footer class="mt-auto pt-20 text-center opacity-30">
+        <p class="text-[0.5rem] tracking-[0.5em] uppercase italic tracking-widest">ASHEL.DEV × NGARUMI DEV</p>
+      </footer>
+    </div>
+  </div>
+  
+  <audio id="audio-player" class="hidden"></audio>
 </Layout>
+
+<script define:vars={{ ashelData }}>
+  const btn = document.getElementById('generate-btn');
+  const audioPlayer = document.getElementById('audio-player');
+  const states = {
+    idle: document.getElementById('state-idle'),
+    loading: document.getElementById('state-loading'),
+    result: document.getElementById('state-result'),
+  };
+
+  function show(key) {
+    Object.entries(states).forEach(([k, el]) => el.classList.toggle('hidden', k !== key));
+  }
+
+  const tToggle = document.getElementById('tafsir-toggle');
+  const tBody = document.getElementById('tafsir-body');
+  const tIcon = document.getElementById('tafsir-icon');
+
+  tToggle.onclick = () => {
+    const isExpanded = tBody.style.maxHeight !== '0px' && tBody.style.maxHeight !== '';
+    tBody.style.maxHeight = isExpanded ? '0px' : '2000px';
+    tIcon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+  };
+
+  btn.addEventListener('click', async () => {
+    btn.disabled = true;
+    const originalLabel = btn.innerHTML;
+    btn.innerHTML = `<span class="animate-pulse tracking-widest uppercase text-[0.6rem]">Membuka Mushaf...</span>`;
+    show('loading');
+    
+    tBody.style.maxHeight = '0px';
+    tIcon.style.transform = 'rotate(0deg)';
+
+    try {
+      const surahNum = Math.floor(Math.random() * 114) + 1;
+      const [resS, resT] = await Promise.all([
+        fetch(`https://equran.id/api/v2/surat/${surahNum}`),
+        fetch(`https://equran.id/api/v2/tafsir/${surahNum}`)
+      ]);
+
+      const surahJson = await resS.json();
+      const tafsirJson = await resT.json();
+      const surat = surahJson.data;
+      const ayah = surat.ayat[Math.floor(Math.random() * surat.ayat.length)];
+      const note = ashelData[Math.floor(Math.random() * ashelData.length)].text;
+
+      document.getElementById('surah-latin').innerText = surat.namaLatin;
+      document.getElementById('surah-arti').innerText = `Berarti: "${surat.arti}"`;
+      document.getElementById('surah-arab').innerText = surat.nama;
+      document.getElementById('surah-nomor').innerText = surahNum;
+      document.getElementById('surah-ayat-count').innerText = surat.jumlahAyat;
+      document.getElementById('surah-tempat').innerText = surat.tempatTurun;
+      document.getElementById('ayat-badge').innerText = `QS. ${surat.namaLatin}:${ayah.nomorAyat}`;
+      document.getElementById('ayat-arab').innerText = ayah.teksArab;
+      document.getElementById('ayat-indo').innerText = ayah.teksIndonesia;
+      document.getElementById('ashel-msg').innerText = note;
+      
+      const tafsirObj = tafsirJson.data.tafsir.find(t => t.ayat === ayah.nomorAyat);
+      document.getElementById('ayat-tafsir').innerText = tafsirObj ? tafsirObj.teks.replace(/<[^>]+>/g, '') : "Tafsir belum tersedia.";
+
+      audioPlayer.src = ayah.audio['01'];
+      show('result');
+      
+      // Smooth scroll ke hasil
+      setTimeout(() => {
+        const resultEl = document.getElementById('state-result');
+        window.scrollTo({
+          top: resultEl.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      }, 300);
+
+    } catch (e) {
+      console.error(e);
+      show('idle');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalLabel;
+    }
+  });
+
+  document.getElementById('btn-audio').onclick = () => audioPlayer.play();
+  
+  document.getElementById('btn-copy').onclick = () => {
+    const arab = document.getElementById('ayat-arab').innerText;
+    const indo = document.getElementById('ayat-indo').innerText;
+    const ref = document.getElementById('ayat-badge').innerText;
+    const note = document.getElementById('ashel-msg').innerText;
+    const textToCopy = `${arab}\n\n"${indo}" (${ref})\n\nCatatan Ashel: ${note}\n\nAmbil hikmah harimu di: ${window.location.origin}`;
+    
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        if (window.Swal) {
+            window.Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Hikmah Disalin!',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                background: '#0a0a0a',
+                color: '#fbbf24',
+                iconColor: '#fbbf24'
+            });
+        } else {
+            alert('Berhasil disalin!');
+        }
+    });
+  };
+
+  document.getElementById('btn-share').onclick = async () => {
+    const indo = document.getElementById('ayat-indo').innerText;
+    const ref = document.getElementById('ayat-badge').innerText;
+    const shareText = `📖 "${indo}" (${ref})\n\nAmbil cahaya harimu di: ${window.location.origin}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Ashel', text: shareText, url: window.location.origin });
+      } catch (err) {}
+    } else {
+      window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+    }
+  };
+</script>
+
+<style is:global>
+  .font-arabic { font-family: 'Scheherazade New', serif; }
+  .swal2-popup.swal2-toast {
+    border: 1px solid rgba(180, 145, 70, 0.3) !important;
+    backdrop-filter: blur(8px);
+    border-radius: 12px !important;
+  }
+  /* Efek active tombol biar lebih responsif di mobile */
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+</style>

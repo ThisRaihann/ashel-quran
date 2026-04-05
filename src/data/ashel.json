@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "text": "Semangat ya hari ini! Inget, Allah nggak bakal ngasih ujian di luar batas kemampuanmu. Baca ayat ini deh...",
+    "mood": "semangat"
+  },
+  {
+    "id": 2,
+    "text": "Lagi sedih ya? Tenang, ada Ashel di sini. Coba renungin ayat ini, semoga hati kamu lebih adem.",
+    "mood": "sedih"
+  }
+]

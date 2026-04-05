@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "EB Garamond", Georgia, serif;
+  --font-display: "Cinzel", serif;
+  --font-arabic: "Scheherazade New", serif;
+  --color-gold-bright: #e8c67a;
+  --color-dark-deep: #080d0b;
+}
+
+@layer base {
+  body { @apply bg-dark-deep text-[#e8dcc8] antialiased selection:bg-amber-500/30; }
+}
+
+@layer utilities {
+  .animate-fade-down { animation: fadeDown 0.8s ease both; }
+  .animate-fade-up { animation: fadeUp 0.8s ease both; }
+  .animate-slide-in { animation: slideIn 0.6s ease both; }
+}
+
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
