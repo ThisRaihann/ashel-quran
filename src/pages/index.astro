@@ -6,8 +6,6 @@ import ashelData from '../data/ashel.json';
 
 <Layout title="Ashel — Cahaya Al-Qur'an Harimu">
   <div class="min-h-screen relative overflow-x-hidden pb-20">
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=EB+Garamond:ital,wght@400&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
 
     <div class="pointer-events-none fixed inset-0 z-0 opacity-60">
       <div class="absolute -top-32 -left-40 w-[600px] h-[600px] rounded-full bg-emerald-900/20 blur-[120px]"></div>
@@ -127,6 +125,10 @@ import ashelData from '../data/ashel.json';
     result: document.getElementById('state-result'),
   };
 
+  // --- CONFIG ADSTERRA ---
+  // Masukkan Link Direct Adsterra kamu di bawah ini
+  const ADSTERRA_URL = "https://www.profitablecpmratenetwork.com/u9idv9r8xp?key=2a264beaa1ae93638a8bda22b7795b77"; 
+
   function show(key) {
     Object.entries(states).forEach(([k, el]) => el.classList.toggle('hidden', k !== key));
   }
@@ -142,6 +144,11 @@ import ashelData from '../data/ashel.json';
   };
 
   btn.addEventListener('click', async () => {
+    // 1. Trigger Iklan Adsterra (Buka di tab baru)
+    if (ADSTERRA_URL !== "") {
+        window.open(ADSTERRA_URL, '_blank');
+    }
+
     btn.disabled = true;
     const originalLabel = btn.innerHTML;
     btn.innerHTML = `<span class="animate-pulse tracking-widest uppercase text-[0.6rem]">Membuka Mushaf...</span>`;
@@ -163,6 +170,7 @@ import ashelData from '../data/ashel.json';
       const ayah = surat.ayat[Math.floor(Math.random() * surat.ayat.length)];
       const note = ashelData[Math.floor(Math.random() * ashelData.length)].text;
 
+      // Update UI Result
       document.getElementById('surah-latin').innerText = surat.namaLatin;
       document.getElementById('surah-arti').innerText = `Berarti: "${surat.arti}"`;
       document.getElementById('surah-arab').innerText = surat.nama;
@@ -198,6 +206,7 @@ import ashelData from '../data/ashel.json';
     }
   });
 
+  // Action Buttons
   document.getElementById('btn-audio').onclick = () => audioPlayer.play();
   
   document.getElementById('btn-copy').onclick = () => {
@@ -249,8 +258,16 @@ import ashelData from '../data/ashel.json';
     backdrop-filter: blur(8px);
     border-radius: 12px !important;
   }
-  /* Efek active tombol biar lebih responsif di mobile */
   .active\:scale-95:active {
     transform: scale(0.95);
+  }
+  
+  /* Animasi Sederhana */
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate-slide-in {
+    animation: slide-in 0.6s ease-out forwards;
   }
 </style>
